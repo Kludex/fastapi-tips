@@ -24,11 +24,11 @@ There's a performance penalty when you use non-async functions in FastAPI. So, a
 The penalty comes from the fact that FastAPI will call [`run_in_threadpool`][run_in_threadpool], which will run the
 function using a thread pool.
 
-> [NOTE!]
+> [!NOTE]
     Internally, [`run_in_threadpool`][run_in_threadpool] will use [`anyio.to_thread.run_sync`][run_sync] to run the
     function in a thread pool.
 
-> [WARNING!]
+> [!TIP]
     There are only 40 threads available in the thread pool. If you use all of them, your application will be blocked.
 
     To change the number of threads available, you can use the following code:
@@ -198,7 +198,7 @@ async def main():
 anyio.run(main)
 ```
 
-> [NOTE!]
+> [!NOTE]
     Consider supporting the creator of [`asgi-lifespan`][asgi-lifespan] [Florimond Manca][florimondmanca] via GitHub Sponsors.
 
 ## 6. Use Lifespan State instead of `app.state`
