@@ -179,7 +179,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     print("Stopping app")
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
@@ -226,7 +226,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         await client.aclose()
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
@@ -256,7 +256,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[State]:
         yield {"client": client}
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
