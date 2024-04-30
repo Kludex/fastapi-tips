@@ -266,6 +266,43 @@ async def read_root(request: Request) -> dict[str, Any]:
     return response.json()
 ```
 
+## 7. Replace the default swagger resource url
+
+For network or various other reasons, you want to customize the `swagger` resource url in FastAPI, then you can try the following method.
+
+Just check if there is a corresponding resource under the custom URL and it will automatically follow the version of the resource in FastAPI.
+
+```py
+import functools
+import inspect
+
+from fastapi import applications, FastAPI
+from fastapi.openapi.docs import get_swagger_ui_html
+
+
+def get_function_default_args(func):
+    sign = inspect.signature(func)
+    return {k: v.default for k, v in sign.parameters.items() if v.default is not inspect.Parameter.empty}
+
+
+def swagger_monkey_patch(customize_swagger_js_url, customize_swagger_css_url, *args, **kwargs):
+    """
+    Wrap the function which is generating the HTML for the /docs endpoint and
+    overwrite the default values for the swagger js and css.
+    """
+    param_dict = get_function_default_args(get_swagger_ui_html)
+    swagger_js_url = param_dict["swagger_js_url"].replace("https://cdn.jsdelivr.net/npm/", customize_swagger_js_url)
+    swagger_css_url = param_dict["swagger_css_url"].replace("https://cdn.jsdelivr.net/npm/", customize_swagger_css_url)
+    return get_swagger_ui_html(*args, **kwargs, swagger_js_url=swagger_js_url, swagger_css_url=swagger_css_url)
+
+
+applications.get_swagger_ui_html = functools.partial(swagger_monkey_patch, customize_swagger_js_url="https://unpkg.com/",
+                                                     customize_swagger_css_url="https://unpkg.com/")
+
+app = FastAPI()
+
+```
+
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
