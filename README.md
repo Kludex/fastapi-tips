@@ -1,4 +1,4 @@
-# 101 FastAPI Tips by The FastAPI Expert
+# 101 FastAPI Tips by The [FastAPI Expert]
 
 This repository contains trips and tricks for FastAPI. If you have any tip that you believe is useful, feel free
 to open an issue or a pull request.
@@ -266,6 +266,48 @@ async def read_root(request: Request) -> dict[str, Any]:
     return response.json()
 ```
 
+## 7. Enable AsyncIO debug mode
+
+If you want to find the endpoints that are blocking the event loop, you can enable the AsyncIO debug mode.
+
+When you enable it, Python will print a warning message when a task takes more than 100ms to execute.
+
+Run the following code with `PYTHONASYNCIODEBUG=1 python main.py`:
+
+```py
+import os
+import time
+
+import uvicorn
+from fastapi import FastAPI
+
+
+app = FastAPI()
+
+
+@app.get("/")
+async def read_root():
+    time.sleep(1)  # Blocking call
+    return {"Hello": "World"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, loop="uvloop")
+```
+
+If you call the endpoint, you will see the following message:
+
+```bash
+INFO:     Started server process [19319]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:50036 - "GET / HTTP/1.1" 200 OK
+Executing <Task finished name='Task-3' coro=<RequestResponseCycle.run_asgi() done, defined at /uvicorn/uvicorn/protocols/http/httptools_impl.py:408> result=None created at /uvicorn/uvicorn/protocols/http/httptools_impl.py:291> took 1.009 seconds
+```
+
+You can read more about it on the [official documentation](https://docs.python.org/3/library/asyncio-dev.html#debug-mode).
+
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
@@ -274,3 +316,4 @@ async def read_root(request: Request) -> dict[str, Any]:
 [florimondmanca]: https://github.com/sponsors/florimondmanca
 [asgi-lifespan]: https://github.com/florimondmanca/asgi-lifespan
 [lifespan state]: https://asgi.readthedocs.io/en/latest/specs/lifespan.html#lifespan-state
+[FastAPI Expert]: https://github.com/Kludex
