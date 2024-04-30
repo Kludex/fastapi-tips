@@ -276,7 +276,7 @@ Just check if there is a corresponding resource under the custom URL and it will
 import functools
 import inspect
 
-from fastapi import applications, FastAPI
+from fastapi import FastAPI, applications
 from fastapi.openapi.docs import get_swagger_ui_html
 
 
@@ -296,8 +296,9 @@ def swagger_monkey_patch(customize_swagger_js_url, customize_swagger_css_url, *a
     return get_swagger_ui_html(*args, **kwargs, swagger_js_url=swagger_js_url, swagger_css_url=swagger_css_url)
 
 
-applications.get_swagger_ui_html = functools.partial(swagger_monkey_patch, customize_swagger_js_url="https://unpkg.com/",
-                                                     customize_swagger_css_url="https://unpkg.com/")
+applications.get_swagger_ui_html = functools.partial(
+    swagger_monkey_patch, customize_swagger_js_url="https://unpkg.com/", customize_swagger_css_url="https://unpkg.com/"
+)
 
 app = FastAPI()
 
