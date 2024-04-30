@@ -7,6 +7,9 @@ Consider sponsor me on GitHub to support my work. With your support, I will be a
 
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor%20me%20on-GitHub-%23EA4AAA)](https://github.com/sponsors/Kludex)
 
+> [!TIP]
+    Remember to **watch this repository** to receive notifications about new tips.
+
 ## 1. Install `uvloop` and `httptools`
 
 By default, [Uvicorn][uvicorn] doesn't comes with `uvloop` and `httptools` which are faster than the default
