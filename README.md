@@ -1,4 +1,4 @@
-# 101 FastAPI Tips by The [FastAPI Expert]
+# 101 FastAPI Tips by [The FastAPI Expert]
 
 This repository contains trips and tricks for FastAPI. If you have any tip that you believe is useful, feel free
 to open an issue or a pull request.
@@ -316,6 +316,20 @@ Executing <Task finished name='Task-3' coro=<RequestResponseCycle.run_asgi() don
 
 You can read more about it on the [official documentation](https://docs.python.org/3/library/asyncio-dev.html#debug-mode).
 
+## 8. Implement a Pure ASGI Middleware instead of `BaseHTTPMiddleware`
+
+The [`BaseHTTPMiddleware`][base-http-middleware] is the simplest way to create a middleware in FastAPI.
+
+> [!NOTE]
+> The `@app.middleware("http")` decorator is a wrapper around the `BaseHTTPMiddleware`.
+
+There were some issues with the `BaseHTTPMiddleware`, but most of the issues were fixed in the latest versions.
+That said, there's still a performance penalty when using it.
+
+To avoid the performance penalty, you can implement a [Pure ASGI middleware]. The downside is that it's more complex to implement.
+
+Check the Starlette's documentation to learn how to implement a [Pure ASGI middleware].
+
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
@@ -324,4 +338,6 @@ You can read more about it on the [official documentation](https://docs.python.o
 [florimondmanca]: https://github.com/sponsors/florimondmanca
 [asgi-lifespan]: https://github.com/florimondmanca/asgi-lifespan
 [lifespan state]: https://asgi.readthedocs.io/en/latest/specs/lifespan.html#lifespan-state
-[FastAPI Expert]: https://github.com/Kludex
+[The FastAPI Expert]: https://github.com/Kludex
+[base-http-middleware]: https://www.starlette.io/middleware/#basehttpmiddleware
+[pure ASGI middleware]: https://www.starlette.io/middleware/#pure-asgi-middleware
