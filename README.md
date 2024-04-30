@@ -21,10 +21,10 @@ pip install uvloop httptools
 
 [Uvicorn][uvicorn] will automatically use them if they are installed in your environment.
 
-> :warning: Warning  
- uvloop can't be installed on Windows. If you use Windows locally, but Linux based system on production,
-    you can use an [environment marker](https://peps.python.org/pep-0496/) to not 
-  install uvloop on Windows e.g. uvloop; sys_platform != 'win32'.
+> [!WARNING]
+> `uvloop` can't be installed on Windows. If you use Windows locally, but Linux on production, you can use
+> an [environment marker](https://peps.python.org/pep-0496/) to not install `uvloop` on Windows
+> e.g. `uvloop; sys_platform != 'win32'`.
 
 ## 2. Be careful with non-async functions
 
