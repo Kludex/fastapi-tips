@@ -231,7 +231,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     async with AsyncClient(app=app) as client:
         app.state.client = client
         yield
-        await client.aclose()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -331,6 +330,123 @@ To avoid the performance penalty, you can implement a [Pure ASGI middleware]. Th
 
 Check the Starlette's documentation to learn how to implement a [Pure ASGI middleware].
 
+## 9. Your dependencies may be running on threads
+
+If the function is non-async and you use it as a dependency, it will run in a thread.
+
+In the following example, the `http_client` function will run in a thread:
+
+```py
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from httpx import AsyncClient
+from fastapi import FastAPI, Request, Depends
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[dict[str, AsyncClient]]:
+    async with AsyncClient() as client:
+        yield {"client": client}
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+def http_client(request: Request) -> AsyncClient:
+    return request.state.client
+
+
+@app.get("/")
+async def read_root(client: AsyncClient = Depends(http_client)):
+    return await client.get("/")
+```
+
+To run in the event loop, you need to make the function async:
+```py
+# ...
+
+async def http_client(request: Request) -> AsyncClient:
+    return request.state.client
+
+# ...
+```
+
+As an exercise for the reader, let's learn a bit more about how to check the running threads.
+
+You can run the following with `python main.py`:
+
+```py
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+import anyio
+from anyio.to_thread import current_default_thread_limiter
+from httpx import AsyncClient
+from fastapi import FastAPI, Request, Depends
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[dict[str, AsyncClient]]:
+    async with AsyncClient() as client:
+        yield {"client": client}
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+# Change this function to be async, and rerun this application.
+def http_client(request: Request) -> AsyncClient:
+    return request.state.client
+
+
+@app.get("/")
+async def read_root(client: AsyncClient = Depends(http_client)): ...
+
+
+async def monitor_thread_limiter():
+    limiter = current_default_thread_limiter()
+    threads_in_use = limiter.borrowed_tokens
+    while True:
+        if threads_in_use != limiter.borrowed_tokens:
+            print(f"Threads in use: {limiter.borrowed_tokens}")
+            threads_in_use = limiter.borrowed_tokens
+        await anyio.sleep(0)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    config = uvicorn.Config(app="main:app")
+    server = uvicorn.Server(config)
+
+    async def main():
+        async with anyio.create_task_group() as tg:
+            tg.start_soon(monitor_thread_limiter)
+            await server.serve()
+
+    anyio.run(main)
+```
+
+If you call the endpoint, you will see the following message:
+
+```bash
+❯ python main.py
+INFO:     Started server process [23966]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Threads in use: 1
+INFO:     127.0.0.1:57848 - "GET / HTTP/1.1" 200 OK
+Threads in use: 0
+```
+
+Replace the `def http_client` with `async def http_client` and rerun the application.
+You will not see the message `Threads in use: 1`, because the function is running in the event loop.
+
+> [!TIP]
+> You can use the [FastAPI Dependency] package that I've built to make it explicit when a dependency should run in a thread.
+
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
@@ -342,3 +458,4 @@ Check the Starlette's documentation to learn how to implement a [Pure ASGI middl
 [The FastAPI Expert]: https://github.com/Kludex
 [base-http-middleware]: https://www.starlette.io/middleware/#basehttpmiddleware
 [pure ASGI middleware]: https://www.starlette.io/middleware/#pure-asgi-middleware
+[FastAPI Dependency]: https://github.com/kludex/fastapi-dependency
