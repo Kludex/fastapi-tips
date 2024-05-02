@@ -247,8 +247,9 @@ async def read_root(request: Request):
 Using the lifespan state, you'd do something like this:
 
 ```py
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, TypedDict, cast
+from typing import Any, TypedDict, cast
 
 from fastapi import FastAPI, Request
 from httpx import AsyncClient
