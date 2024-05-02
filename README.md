@@ -154,11 +154,11 @@ assert response.json() == {"Hello": "World"}
 
 # Using AsyncClient
 import anyio
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 
 async def main():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/")
         assert response.status_code == 200
         assert response.json() == {"Hello": "World"}
@@ -176,7 +176,7 @@ from typing import AsyncIterator
 
 import anyio
 from asgi_lifespan import LifespanManager
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from fastapi import FastAPI
 
 
@@ -197,7 +197,7 @@ async def read_root():
 
 async def main():
     async with LifespanManager(app, lifespan) as manager:
-        async with AsyncClient(app=manager.app) as client:
+        async with AsyncClient(transport=ASGITransport(app=manager.app)) as client:
             response = await client.get("/")
             assert response.status_code == 200
             assert response.json() == {"Hello": "World"}
