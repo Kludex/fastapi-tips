@@ -28,9 +28,26 @@ pip install uvloop httptools
 
 ## 2. Be careful with non-async functions
 
-There's a performance penalty when you use non-async functions in FastAPI. So, always prefer to use async functions.
-The penalty comes from the fact that FastAPI will call [`run_in_threadpool`][run_in_threadpool], which will run the
-function using a thread pool.
+You should only use non-async functions (`def`) when you have either:
+1. Thread blocking IO e.g.:
+    ```py
+    import requests
+    from fastapi import FastAPI
+
+    app = FastAPI()
+
+
+    @app.get("/")
+    def get_request() -> None:
+        requests.get("https://example.org/")
+    ```
+2. CPU bound blocking that escapes the GIL e.g.:
+   ```py
+   ```
+
+When you use a non-async function, FastAPI will call [`run_in_threadpool`][run_in_threadpool], which will run the
+function using a thread pool. If your code isn't running one of the above two points, always prefer to use an async
+function.
 
 > [!NOTE]
     Internally, [`run_in_threadpool`][run_in_threadpool] will use [`anyio.to_thread.run_sync`][run_sync] to run the
@@ -39,7 +56,7 @@ function using a thread pool.
 > [!TIP]
     There are only 40 threads available in the thread pool. If you use all of them, your application will be blocked.
 
-To change the number of threads available, you can use the following code:
+    To change the number of threads available, you can use the following code:
 
 ```py
 import anyio
