@@ -196,7 +196,7 @@ async def read_root():
 
 
 async def main():
-    async with LifespanManager(app, lifespan) as manager:
+    async with LifespanManager(app) as manager:
         async with AsyncClient(transport=ASGITransport(app=manager.app)) as client:
             response = await client.get("/")
             assert response.status_code == 200
