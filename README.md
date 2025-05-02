@@ -12,8 +12,9 @@ Consider sponsor me on GitHub to support my work. With your support, I will be a
 
 ## 1. Install `uvloop` and `httptools`
 
-By default, [Uvicorn][uvicorn] doesn't comes with `uvloop` and `httptools` which are faster than the default
-asyncio event loop and HTTP parser. You can install them using the following command:
+If you _don't_ install FastAPI with its [standard set of optional dependencies][fastapi-standard] (`pip install fastapi[standard]`),
+you most likely depend on [Uvicorn][uvicorn] directly. By default, [Uvicorn][uvicorn] doesn't come with `uvloop` and `httptools`
+which are faster than the default asyncio event loop and HTTP parser. You can install them using the following command:
 
 ```bash
 pip install uvloop httptools
@@ -447,6 +448,7 @@ You will not see the message `Threads in use: 1`, because the function is runnin
 > [!TIP]
 > You can use the [FastAPI Dependency] package that I've built to make it explicit when a dependency should run in a thread.
 
+[fastapi-standard]: https://fastapi.tiangolo.com/#standard-dependencies
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
