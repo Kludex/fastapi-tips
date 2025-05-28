@@ -447,6 +447,87 @@ You will not see the message `Threads in use: 1`, because the function is runnin
 > [!TIP]
 > You can use the [FastAPI Dependency] package that I've built to make it explicit when a dependency should run in a thread.
 
+## 10. Control Access to API Documentation
+
+By default, FastAPI provides three documentation-related endpoints:
+- `/docs`: Swagger UI documentation (interactive)
+- `/redoc`: ReDoc documentation (alternative UI)
+- `/openapi.json`: OpenAPI schema
+
+You might want to either completely remove these endpoints (for security or to reduce the API footprint) or protect them with authentication. Here are both approaches:
+
+### Remove Documentation Completely
+
+To completely remove all documentation endpoints:
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI(
+    docs_url=None,      # Remove Swagger UI
+    redoc_url=None,     # Remove ReDoc UI
+    openapi_url=None,   # Remove OpenAPI schema
+)
+```
+
+### Protect Documentation with Authentication
+
+A more common approach is to protect the documentation endpoints with authentication. This way, only authorized users (like superusers or developers) can access them:
+
+```python
+from fastapi import FastAPI, Depends, APIRouter
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
+from typing import Any
+
+# First, disable the default documentation endpoints
+app = FastAPI(
+    docs_url=None, 
+    redoc_url=None, 
+    openapi_url=None,
+    title="My API",
+    version="0.1.0",
+)
+
+# Create a router that requires authentication for all routes
+# The get_current_superuser dependency should verify the user is authenticated
+# and has superuser privileges
+docs_router = APIRouter(dependencies=[Depends(get_current_superuser)])
+
+# Recreate the Swagger UI endpoint with authentication
+@docs_router.get("/docs", include_in_schema=False)
+async def get_swagger_documentation() -> fastapi.responses.HTMLResponse:
+    """Protected Swagger UI endpoint"""
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="docs")
+
+# Recreate the ReDoc endpoint with authentication
+@docs_router.get("/redoc", include_in_schema=False)
+async def get_redoc_documentation() -> fastapi.responses.HTMLResponse:
+    """Protected ReDoc endpoint"""
+    return get_redoc_html(openapi_url="/openapi.json", title="docs")
+
+# Recreate the OpenAPI schema endpoint with authentication
+# This endpoint is required by both Swagger UI and ReDoc
+@docs_router.get("/openapi.json", include_in_schema=False)
+async def openapi() -> dict[str, Any]:
+    """Protected OpenAPI schema endpoint"""
+    out: dict = get_openapi(
+        title=app.title,
+        version=app.version,
+        routes=app.routes
+    )
+    return out
+
+# Include the protected documentation routes in the main application
+app.include_router(docs_router)
+```
+
+> [!TIP]
+    This pattern is particularly useful when you want to restrict access to your API documentation in production environments while keeping it accessible to authorized users. Common use cases include:
+    - Protecting sensitive API details in production
+    - Allowing only internal developers to access the documentation
+    - Maintaining different documentation access levels for different user roles
+
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
