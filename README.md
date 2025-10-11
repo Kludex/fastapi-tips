@@ -447,6 +447,33 @@ You will not see the message `Threads in use: 1`, because the function is runnin
 > [!TIP]
 > You can use the [FastAPI Dependency] package that I've built to make it explicit when a dependency should run in a thread.
 
+## 10. Use `pytest.mark.anyio` instead of `pytest.mark.asyncio`
+
+You already have [`anyio`](https://github.com/agronholm/anyio) installed, since it's a dependency of Starlette.
+Which means, you can use `pytest.mark.anyio` instead of `pytest.mark.asyncio`.
+
+```py
+import pytest
+
+@pytest.mark.anyio
+async def test_async_function(): ...
+```
+
+By default, `anyio` runs every test that has the marker twice, once with `trio` and another time with `asyncio`.
+You probably want to restrict that by using either one or the other, in case you are testing an application,
+and not a package:
+
+```py
+import pytest
+
+@pytest.fixture
+def anyio_backend():
+    return "asyncio"  # or "trio"
+```
+
+You can read more about it on the
+[`anyio` documentation](https://anyio.readthedocs.io/en/stable/testing.html#specifying-the-backends-to-run-on).
+
 [uvicorn]: https://www.uvicorn.org/
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
