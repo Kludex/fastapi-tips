@@ -459,7 +459,7 @@ import pytest
 async def test_async_function(): ...
 ```
 
-By default, `anyio` runs every test that has the marker twice, once with `trio` and another time with `asyncio`.
+By default, `anyio` runs every tests that has the marker on `asyncio` backend. If you also have`trio` installed, it will run each test twice, once with `trio` and another time with `asyncio`.
 You probably want to restrict that by using either one or the other, in case you are testing an application,
 and not a package:
 
