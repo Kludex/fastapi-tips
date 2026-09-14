@@ -478,11 +478,11 @@ You can read more about it on the
 [run_sync]: https://anyio.readthedocs.io/en/stable/threads.html#running-a-function-in-a-worker-thread
 [run_in_threadpool]: https://github.com/encode/starlette/blob/9f16bf5c25e126200701f6e04330864f4a91a898/starlette/concurrency.py#L36-L42
 [increase-threadpool]: https://anyio.readthedocs.io/en/stable/threads.html#adjusting-the-default-maximum-worker-thread-count
-[websockets-iter-data]: https://www.starlette.io/websockets/#iterating-data
+[websockets-iter-data]: https://starlette.dev/websockets/#iterating-data
 [florimondmanca]: https://github.com/sponsors/florimondmanca
 [asgi-lifespan]: https://github.com/florimondmanca/asgi-lifespan
 [lifespan state]: https://asgi.readthedocs.io/en/latest/specs/lifespan.html#lifespan-state
 [The FastAPI Expert]: https://github.com/Kludex
-[base-http-middleware]: https://www.starlette.io/middleware/#basehttpmiddleware
-[pure ASGI middleware]: https://www.starlette.io/middleware/#pure-asgi-middleware
+[base-http-middleware]: https://starlette.dev/middleware/#basehttpmiddleware
+[pure ASGI middleware]: https://starlette.dev/middleware/#pure-asgi-middleware
 [FastAPI Dependency]: https://github.com/kludex/fastapi-dependency
